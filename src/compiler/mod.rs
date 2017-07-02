@@ -4,8 +4,12 @@ use file_context::FileContext;
 use sass;
 use variablescope::GlobalScope;
 
-pub fn compile(_file_context: &FileContext,
-               _items: &[sass::Item])
+mod item;
+
+pub fn compile(file_context: &FileContext,
+               sass_items: &[sass::Item])
                -> Result<Vec<css::Item>, Error> {
-    Ok(vec![])
+    let mut scope = GlobalScope::new();
+
+    item::compile_root_items(file_context, &mut scope, sass_items)
 }
