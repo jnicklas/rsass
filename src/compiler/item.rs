@@ -72,11 +72,8 @@ pub fn compile_root_item(file_context: &FileContext,
                 &None => None,
             };
 
-            Ok(vec![css::Item::AtRule {
-                        name: name.clone(),
-                        args: args,
-                        body: body,
-                    }])
+            let at_rule = css::AtRule::new(name.clone(), args, body);
+            Ok(vec![css::Item::AtRule(at_rule)])
         }
         sass::Item::MixinDeclaration { ref name, ref args, ref body } => {
             scope.define_mixin(name, args, body);
@@ -241,11 +238,8 @@ pub fn compile_body_item(file_context: &FileContext,
                 &None => None,
             };
 
-            Ok(vec![css::Item::AtRule {
-                        name: name.clone(),
-                        args: args,
-                        body: body,
-                    }])
+            let at_rule = css::AtRule::new(name.clone(), args, body);
+            Ok(vec![css::Item::AtRule(at_rule)])
         }
         sass::Item::MixinDeclaration { ref name, ref args, ref body } => {
             scope.define_mixin(name, args, body);

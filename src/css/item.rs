@@ -1,9 +1,9 @@
-use css::{Rule, Value};
+use css::{AtRule, Rule, Value};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Item {
     Import(Value),
-    AtRule { name: String, args: Value, body: Option<Vec<Item>> },
+    AtRule(AtRule),
     Rule(Rule),
     Property(String, Value, bool),
     Comment(String),
