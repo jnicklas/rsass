@@ -1,4 +1,5 @@
 use css::Value;
+use std::ascii::AsciiExt;
 use std::default::Default;
 use std::fmt;
 
@@ -33,6 +34,15 @@ impl CallArgs {
 
     pub fn get(&self, index: usize) -> Option<&(Option<String>, Value)> {
         self.0.get(index)
+    }
+
+    pub fn is_ascii(&self) -> bool {
+        self.0
+            .iter()
+            .all(|&(ref s, ref v)| match s {
+                     &Some(ref s) => s.is_ascii() && v.is_ascii(),
+                     &None => v.is_ascii(),
+                 })
     }
 }
 

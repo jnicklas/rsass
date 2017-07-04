@@ -2,6 +2,7 @@ use css::CallArgs;
 use error::Error;
 use num_rational::Rational;
 use num_traits::{One, Signed, Zero};
+use std::ascii::AsciiExt;
 use std::fmt;
 use value::{ListSeparator, Operator, Quotes, Unit, rgb_to_name};
 
@@ -66,6 +67,28 @@ impl Value {
             Value::True | Value::False => "bool",
             Value::Null => "null",
             _ => "unknown",
+        }
+    }
+
+    pub fn is_ascii(&self) -> bool {
+        match self {
+            &Value::Call(ref name, ref args) => {
+                name.is_ascii() && args.is_ascii()
+            }
+            &Value::Div(ref left, ref right, _, _) => {
+                left.is_ascii() && right.is_ascii()
+            }
+            &Value::Literal(ref string, _) => string.is_ascii(),
+            &Value::List(ref values, _) => values.iter().all(|v| v.is_ascii()),
+            &Value::Paren(ref value) => value.is_ascii(),
+            &Value::Numeric(_, _, _, _) => true,
+            &Value::Color(_, _, _, _, Some(ref name)) => name.is_ascii(),
+            &Value::Color(_, _, _, _, None) => true,
+            &Value::BinOp(ref left, _, ref right) => {
+                left.is_ascii() && right.is_ascii()
+            }
+            &Value::UnaryOp(_, ref value) => value.is_ascii(),
+            &Value::Null | &Value::True | &Value::False => true,
         }
     }
 
