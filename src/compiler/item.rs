@@ -232,7 +232,7 @@ pub fn compile_body_item(file_context: &FileContext,
                 &Some(ref body) => {
                     Some(compile_body_items(&file_context,
                                             &mut ScopeImpl::sub(scope),
-                                            &Selectors::root(),
+                                            &selectors,
                                             &body)?)
                 }
                 &None => None,
