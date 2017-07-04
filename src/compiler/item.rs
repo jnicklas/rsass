@@ -18,6 +18,8 @@ pub fn compile_root_items(file_context: &FileContext,
                              .into_iter());
     }
 
+    css_items.sort();
+
     Ok(css_items)
 }
 
@@ -187,6 +189,8 @@ pub fn compile_body_items(file_context: &FileContext,
                                            sass_item)?
                                  .into_iter());
     }
+
+    css_items.sort();
 
     Ok(css_items)
 }
