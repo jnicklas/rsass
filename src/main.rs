@@ -3,7 +3,7 @@ extern crate rsass;
 
 use clap::{App, Arg, ArgMatches};
 use rsass::{Error, OutputStyle, compile_scss_file};
-use std::io::{Write, stderr, stdout};
+use std::io::{self, Write, stderr, stdout};
 use std::process::exit;
 
 fn main() {
@@ -44,9 +44,9 @@ fn run(args: &ArgMatches) -> Result<(), Error> {
     };
     if let Some(inputs) = args.values_of("INPUT") {
         for name in inputs {
-            let result = compile_scss_file(name.as_ref(), style.clone())?;
             let out = stdout();
-            out.lock().write_all(&result)?;
+            let mut buffer = io::BufWriter::new(out.lock());
+            compile_scss_file(name.as_ref(), &mut buffer, style.clone())?;
         }
     }
     Ok(())

@@ -5,6 +5,7 @@
 //! added.
 extern crate rsass;
 use rsass::{OutputStyle, compile_scss, compile_scss_file};
+use std::path::Path;
 
 #[test]
 fn t00_empty() {
@@ -312,10 +313,7 @@ fn t13_back_references() {
 
 #[test]
 fn t14_imports() {
-    let path = "tests/basic/14_imports/input.scss";
-    assert_eq!(compile_scss_file(path.as_ref(), OutputStyle::Normal)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .unwrap(),
+    check_file("tests/basic/14_imports/input.scss".as_ref(),
                "div span {\n  moo: goo;\n}\n\n\
                 foo {\n  blah: blah;\n}\n\
                 foo goo {\n  blee: blee;\n  hello: world;\n}\n\
@@ -730,10 +728,7 @@ fn t32_percentages() {
 
 #[test]
 fn t33_ambigous_imports() {
-    let path = "tests/basic/33_ambiguous_imports/input.scss";
-    assert_eq!(compile_scss_file(path.as_ref(), OutputStyle::Normal)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .unwrap(),
+    check_file("tests/basic/33_ambiguous_imports/input.scss".as_ref(),
                "main {\n  color: red;\n}\n\n\
                 dir {\n  color: blue;\n}\n\n\
                 fudge {\n  color: brown;\n}\n")
@@ -1238,9 +1233,16 @@ fn ti815_str_slice() {
           "foo {\n  foo: \"ba\";\n  bar: \"r\";\n}\n")
 }
 
+fn check_file(path: &Path, expected: &str) {
+    let mut buffer = Vec::new();
+    compile_scss_file(path, &mut buffer, OutputStyle::Normal).unwrap();
+    let actual = String::from_utf8(buffer).unwrap();
+    assert_eq!(&actual, expected);
+}
+
 fn check(input: &[u8], expected: &str) {
-    assert_eq!(compile_scss(input, OutputStyle::Normal)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .unwrap(),
-               expected);
+    let mut buffer = Vec::new();
+    compile_scss(input, &mut buffer, OutputStyle::Normal).unwrap();
+    let actual = String::from_utf8(buffer).unwrap();
+    assert_eq!(&actual, expected);
 }

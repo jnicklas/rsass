@@ -8,10 +8,10 @@ use rsass::{OutputStyle, compile_scss};
 // including interpolation.
 
 fn check(input: &str, expected: &str) {
-    assert_eq!(compile_scss(input.as_bytes(), OutputStyle::Normal)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .map_err(|e| format!("{:?}", e)),
-               Ok(expected.to_string()));
+    let mut buffer = Vec::new();
+    compile_scss(input.as_bytes(), &mut buffer, OutputStyle::Normal).unwrap();
+    let actual = String::from_utf8(buffer).unwrap();
+    assert_eq!(&actual, expected);
 }
 
 #[test]
