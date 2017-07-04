@@ -6,12 +6,14 @@
 //! # Example
 //!
 //! ```
+//! use std::io::Write;
 //! use rsass::{OutputStyle, compile_scss_file};
 //!
-//! let file = "tests/basic/14_imports/a.scss".as_ref();
-//! let css = compile_scss_file(file, OutputStyle::Compressed).unwrap();
-//!
-//! assert_eq!(css, b"div span{moo:goo}\n")
+//! let mut buffer = Vec::new();
+//! let path = "tests/basic/14_imports/a.scss";
+//! let style = OutputStyle::Compressed;
+//! compile_scss_file(path.as_ref(), &mut buffer, style).unwrap();
+//! assert_eq!(&buffer, b"div span{moo:goo}\n");
 //! ```
 //!
 //! # Sass language and implemetation status
@@ -40,8 +42,6 @@ extern crate num_rational;
 extern crate num_traits;
 extern crate rand;
 
-use std::path::Path;
-
 mod error;
 mod functions;
 mod selectors;
@@ -55,6 +55,7 @@ mod compiler;
 pub mod sass;
 pub mod css;
 
+
 pub use error::Error;
 
 pub use file_context::FileContext;
@@ -63,6 +64,8 @@ pub use num_rational::Rational;
 pub use output_style::OutputStyle;
 pub use parser::{parse_scss_data, parse_scss_file, parse_value_data};
 pub use sass::Item;
+use std::io;
+use std::path::Path;
 
 pub use value::{ListSeparator, Quotes, Unit};
 pub use variablescope::{GlobalScope, Scope};
@@ -88,22 +91,32 @@ pub fn compile_value(input: &[u8]) -> Result<Vec<u8>, Error> {
 /// # Example
 ///
 /// ```
-/// use rsass::{OutputStyle, compile_scss};
+/// ```
+/// use std::io::Write;
+/// use rsass::{OutputStyle, compile_scss_file};
 ///
-/// assert_eq!(compile_scss(b"foo {\n\
-///                             bar {\n\
-///                               baz:value;\n\
-///                             }\n\
-///                           }", OutputStyle::Compressed).unwrap(),
-///            b"foo bar{baz:value}\n")
+/// let mut buffer = Vec::new();
+/// let path = "tests/basic/14_imports/a.scss";
+/// let style = OutputStyle::Compressed;
+/// let input = b"foo {\n\
+///                 bar {\n\
+///                   baz:value;\n\
+///                 }\n\
+///               }"
+/// compile_scss_file(input, &mut buffer, style).unwrap();
+/// assert_eq!(&buffer, b"foo bar{baz:value}\n");
 /// ```
 pub fn compile_scss(input: &[u8],
+                    output: &mut io::Write,
                     style: OutputStyle)
-                    -> Result<Vec<u8>, Error> {
+                    -> Result<(), Error> {
     let file_context = FileContext::new();
     let sass_items = parse_scss_data(input)?;
     let _css_items = compiler::compile(&file_context, &sass_items);
-    style.write_root(&sass_items, &mut GlobalScope::new(), file_context)
+    let result =
+        style.write_root(&sass_items, &mut GlobalScope::new(), file_context)?;
+    output.write_all(&result)?;
+    Ok(())
 }
 
 /// Parse a file of scss data and write css in the given style.
@@ -114,18 +127,25 @@ pub fn compile_scss(input: &[u8],
 /// # Example
 ///
 /// ```
+/// use std::io::Write;
 /// use rsass::{OutputStyle, compile_scss_file};
 ///
-/// assert_eq!(compile_scss_file("tests/basic/14_imports/a.scss".as_ref(),
-///                              OutputStyle::Compressed).unwrap(),
-///            b"div span{moo:goo}\n")
+/// let mut buffer = Vec::new();
+/// let path = "tests/basic/14_imports/a.scss";
+/// let style = OutputStyle::Compressed;
+/// compile_scss_file(path.as_ref(), &mut buffer, style).unwrap();
+/// assert_eq!(&buffer, b"div span{moo:goo}\n");
 /// ```
 pub fn compile_scss_file(file: &Path,
+                         output: &mut io::Write,
                          style: OutputStyle)
-                         -> Result<Vec<u8>, Error> {
+                         -> Result<(), Error> {
     let file_context = FileContext::new();
     let (sub_context, file) = file_context.file(file);
     let sass_items = parse_scss_file(&file)?;
     let _css_items = compiler::compile(&file_context, &sass_items);
-    style.write_root(&sass_items, &mut GlobalScope::new(), sub_context)
+    let result =
+        style.write_root(&sass_items, &mut GlobalScope::new(), sub_context)?;
+    output.write_all(&result)?;
+    Ok(())
 }
