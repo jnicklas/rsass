@@ -15,7 +15,7 @@ fn unicode_in_normal() {
            }",
           "@charset \"UTF-8\";\n\
            a {\n  content: \"Blåbärsöl\";\n}\n",
-          OutputStyle::Normal)
+          OutputStyle::Expanded(0))
 }
 
 #[test]

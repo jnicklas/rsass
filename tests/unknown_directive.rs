@@ -9,7 +9,8 @@ use rsass::{OutputStyle, compile_scss};
 
 fn check(input: &str, expected: &str) {
     let mut buffer = Vec::new();
-    compile_scss(input.as_bytes(), &mut buffer, OutputStyle::Normal).unwrap();
+    compile_scss(input.as_bytes(), &mut buffer, OutputStyle::Expanded(0))
+        .unwrap();
     let actual = String::from_utf8(buffer).unwrap();
     assert_eq!(&actual, expected);
 }

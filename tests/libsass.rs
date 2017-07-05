@@ -30,8 +30,8 @@ fn t01_arg_eval() {
 }
 
 fn check(input: &[u8], expected: &str) {
-    assert_eq!(compile_scss(input, OutputStyle::Normal)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .unwrap(),
-               expected);
+    let mut buffer = Vec::new();
+    compile_scss(input, &mut buffer, OutputStyle::Expanded(0)).unwrap();
+    let actual = String::from_utf8(buffer).unwrap();
+    assert_eq!(&actual, expected);
 }

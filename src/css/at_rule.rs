@@ -3,9 +3,9 @@ use std::ascii::AsciiExt;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AtRule {
-    name: String,
-    args: Value,
-    body: Option<Vec<Item>>,
+    pub name: String,
+    pub args: Value,
+    pub body: Option<Vec<Item>>,
 }
 
 impl AtRule {

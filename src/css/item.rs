@@ -30,6 +30,26 @@ impl Item {
             &Item::Comment(ref c) => c.is_ascii(),
         }
     }
+
+    pub fn is_body_item(&self, include_comments: bool) -> bool {
+        match self {
+            &Item::Import(_) => false,
+            &Item::AtRule(_) => false,
+            &Item::Rule(_) => false,
+            &Item::Property(_, _, _) => true,
+            &Item::Comment(_) => include_comments,
+        }
+    }
+
+    pub fn is_root_item(&self, include_comments: bool) -> bool {
+        match self {
+            &Item::Import(_) => true,
+            &Item::AtRule(_) => true,
+            &Item::Rule(_) => true,
+            &Item::Property(_, _, _) => false,
+            &Item::Comment(_) => include_comments,
+        }
+    }
 }
 
 impl PartialOrd for Item {
