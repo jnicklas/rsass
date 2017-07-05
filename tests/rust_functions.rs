@@ -2,18 +2,30 @@ extern crate rsass;
 use rsass::*;
 use std::sync::Arc;
 
+fn compile_with_scope(scope: &mut Scope,
+                      input: &[u8])
+                      -> Result<String, Error> {
+    let sass_items = parse_scss_data(input)?;
+
+    let file_context = FileContext::new();
+    let css_items =
+        compiler::compile_in_scope(&file_context, scope, &sass_items)?;
+
+    let mut buffer = Vec::new();
+    writer::write(&mut buffer, OutputStyle::Compressed, &css_items)?;
+
+    Ok(String::from_utf8(buffer)?)
+}
+
 #[test]
 fn simple_value() {
     let mut scope = GlobalScope::new();
     scope.define("color", &css::Value::black());
-    let parsed = parse_scss_data(b"p { color: $color }").unwrap();
-    let style = OutputStyle::Compressed;
-    let file_context = FileContext::new();
-    assert_eq!(style
-                   .write_root(&parsed, &mut scope, file_context)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .unwrap(),
-               "p{color:black}\n");
+
+    let output = compile_with_scope(&mut scope, b"p { color: $color }")
+        .unwrap();
+
+    assert_eq!(output, "p{color:black}\n");
 }
 
 #[test]
@@ -25,14 +37,10 @@ fn simple_function() {
                                                 Arc::new(|_| {
         Ok(css::Value::scalar(42))
     })));
-    let parsed = parse_scss_data(b"p { x: get_answer(); }").unwrap();
-    let style = OutputStyle::Compressed;
-    let file_context = FileContext::new();
-    assert_eq!(style
-                   .write_root(&parsed, &mut scope, file_context)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .unwrap(),
-               "p{x:42}\n");
+    let output = compile_with_scope(&mut scope, b"p { x: get_answer(); }")
+        .unwrap();
+
+    assert_eq!(output, "p{x:42}\n");
 }
 
 #[test]
@@ -60,12 +68,7 @@ fn function_with_args() {
             (a, b) => Err(Error::badargs(&["number", "number"], &[&a, &b])),
         }
     })));
-    let parsed = parse_scss_data(b"p { x: halfway(10, 18); }").unwrap();
-    let style = OutputStyle::Compressed;
-    let file_context = FileContext::new();
-    assert_eq!(style
-                   .write_root(&parsed, &mut scope, file_context)
-                   .and_then(|s| Ok(String::from_utf8(s)?))
-                   .unwrap(),
-               "p{x:14}\n");
+    let output = compile_with_scope(&mut scope, b"p { x: halfway(10, 18); }")
+        .unwrap();
+    assert_eq!(output, "p{x:14}\n");
 }

@@ -37,7 +37,7 @@ mod t04_space_list_quoted {
 
 fn check(input: &[u8], expected: &str) {
     let mut buffer = Vec::new();
-    compile_scss(input, &mut buffer, OutputStyle::Normal).unwrap();
+    compile_scss(input, &mut buffer, OutputStyle::Expanded(0)).unwrap();
     let actual = String::from_utf8(buffer).unwrap();
     assert_eq!(&actual, expected);
 }

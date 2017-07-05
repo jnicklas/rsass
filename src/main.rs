@@ -40,13 +40,13 @@ fn run(args: &ArgMatches) -> Result<(), Error> {
     let style = if args.value_of("STYLE") == Some("compressed") {
         OutputStyle::Compressed
     } else {
-        OutputStyle::Normal
+        OutputStyle::Expanded(0)
     };
     if let Some(inputs) = args.values_of("INPUT") {
         for name in inputs {
             let out = stdout();
             let mut buffer = io::BufWriter::new(out.lock());
-            compile_scss_file(name.as_ref(), &mut buffer, style.clone())?;
+            compile_scss_file(name.as_ref(), &mut buffer, style)?;
         }
     }
     Ok(())
