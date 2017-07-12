@@ -4,7 +4,7 @@ mod at_rule;
 mod property;
 mod comment;
 
-pub use self::at_rule::write_at_rule;
+pub use self::at_rule::{write_at_rule, write_root_at_rule};
 pub use self::comment::write_comment;
 pub use self::items::write_items as write;
 pub use self::items::write_items;
