@@ -7,6 +7,7 @@ use variablescope::{GlobalScope, Scope};
 mod root_items;
 mod body_items;
 mod function_items;
+mod selectors;
 
 pub fn compile(file_context: &FileContext,
                sass_items: &[sass::Item])

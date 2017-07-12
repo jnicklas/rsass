@@ -1,10 +1,10 @@
+use css;
 use output_style::OutputStyle;
-use selectors::{Selector, SelectorPart, Selectors};
 use std::io;
 
 pub fn write_selectors(out: &mut io::Write,
                        style: OutputStyle,
-                       selectors: &Selectors)
+                       selectors: &css::Selectors)
                        -> io::Result<()> {
     if let Some((first, rest)) = selectors.0.split_first() {
         write_selector(out, style, first)?;
@@ -18,7 +18,7 @@ pub fn write_selectors(out: &mut io::Write,
 
 pub fn write_selector(out: &mut io::Write,
                       style: OutputStyle,
-                      selector: &Selector)
+                      selector: &css::Selector)
                       -> io::Result<()> {
     // Note: There should be smarter whitespace-handling here, avoiding
     // the need to clean up afterwards.
@@ -40,16 +40,16 @@ pub fn write_selector(out: &mut io::Write,
 
 pub fn write_selector_part(out: &mut io::Write,
                            style: OutputStyle,
-                           part: &SelectorPart)
+                           part: &css::SelectorPart)
                            -> io::Result<()> {
     match *part {
-        SelectorPart::Simple(ref s) => {
+        css::SelectorPart::Simple(ref s) => {
             write!(out, "{}", s)?;
         }
-        SelectorPart::Descendant => {
+        css::SelectorPart::Descendant => {
             write!(out, " ")?;
         }
-        SelectorPart::RelOp(ref c) => {
+        css::SelectorPart::RelOp(ref c) => {
             if *c == b'~' {
                 write!(out, " {} ", *c as char)?;
             } else {
@@ -57,13 +57,13 @@ pub fn write_selector_part(out: &mut io::Write,
                 write!(out, "{}{}{}", sep, *c as char, sep)?;
             }
         }
-        SelectorPart::Attribute { ref name, ref op, ref val } => {
+        css::SelectorPart::Attribute { ref name, ref op, ref val } => {
             write!(out, "[{}{}{}]", name, op, val)?;
         }
-        SelectorPart::PseudoElement(ref name) => {
+        css::SelectorPart::PseudoElement(ref name) => {
             write!(out, "::{}", name)?;
         }
-        SelectorPart::Pseudo { ref name, ref arg } => {
+        css::SelectorPart::Pseudo { ref name, ref arg } => {
             if let Some(ref arg) = *arg {
                 write!(out, ":{}(", name)?;
                 // It seems some pseudo-classes should always have
@@ -80,7 +80,7 @@ pub fn write_selector_part(out: &mut io::Write,
                 write!(out, ":{}", name)?;
             }
         }
-        SelectorPart::BackRef => {
+        css::SelectorPart::BackRef => {
             write!(out, "&")?;
         }
     }

@@ -1,6 +1,5 @@
 use css;
 use output_style::OutputStyle;
-use selectors::Selectors;
 use std::io;
 use writer::*;
 
@@ -13,7 +12,7 @@ pub fn write_root_at_rule(out: &mut io::Write,
 
 pub fn write_at_rule(out: &mut io::Write,
                      style: OutputStyle,
-                     parent_selectors: &Selectors,
+                     parent_selectors: &css::Selectors,
                      at_rule: &css::AtRule)
                      -> io::Result<()> {
     write_at_rule_with_body_fun(out, style, at_rule, |out, style, body| {

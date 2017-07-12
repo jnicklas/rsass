@@ -1,10 +1,10 @@
 use compiler::body_items::*;
+use compiler::selectors::*;
 use css;
 use error::Error;
 use file_context::FileContext;
 use parser::parse_scss_file;
 use sass;
-use selectors::Selectors;
 use value::Quotes;
 use variablescope::{Scope, ScopeImpl};
 
@@ -69,7 +69,7 @@ pub fn compile_root_item(file_context: &FileContext,
                 &Some(ref body) => {
                     Some(compile_body_items(&file_context,
                                             &mut ScopeImpl::sub(scope),
-                                            &Selectors::root(),
+                                            &sass::Selectors::root(),
                                             &body)?)
                 }
                 &None => None,
@@ -155,13 +155,15 @@ pub fn compile_root_item(file_context: &FileContext,
             Ok(css_items)
         }
         sass::Item::Rule(ref s, ref body) => {
-            let root = Selectors::root();
+            let root = sass::Selectors::root();
             let selectors = s.inside(Some(&root));
             let mut scope = ScopeImpl::sub(scope);
             let css_items =
                 compile_body_items(file_context, &mut scope, &selectors, body)?;
             if css_items.len() > 0 {
-                Ok(vec![css::Item::Rule(css::Rule::new(selectors, css_items))])
+                let css_selectors = compile_selectors(&mut scope, &selectors)?;
+                Ok(vec![css::Item::Rule(css::Rule::new(css_selectors,
+                                                       css_items))])
             } else {
                 Ok(vec![])
             }

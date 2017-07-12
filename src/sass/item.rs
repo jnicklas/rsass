@@ -1,7 +1,6 @@
 use functions::SassFunction;
-use sass::{CallArgs, FormalArgs};
+use sass::{CallArgs, FormalArgs, Selectors};
 use sass::Value;
-use selectors::Selectors;
 
 /// Every sass file is a sequence of sass items.
 /// Scoping items contains further sequences of items.

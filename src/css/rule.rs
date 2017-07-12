@@ -1,5 +1,4 @@
-use css::Item;
-use selectors::Selectors;
+use css::{Item, Selectors};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Rule {

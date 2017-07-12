@@ -44,7 +44,6 @@ extern crate rand;
 
 mod error;
 mod functions;
-mod selectors;
 mod value;
 mod variablescope;
 mod output_style;

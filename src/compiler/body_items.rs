@@ -1,14 +1,14 @@
+use compiler::selectors::*;
 use css;
 use error::Error;
 use file_context::FileContext;
 use parser::parse_scss_file;
 use sass;
-use selectors::Selectors;
 use variablescope::{Scope, ScopeImpl};
 
 pub fn compile_body_items(file_context: &FileContext,
                           scope: &mut Scope,
-                          selectors: &Selectors,
+                          selectors: &sass::Selectors,
                           sass_items: &[sass::Item])
                           -> Result<Vec<css::Item>, Error> {
     let mut css_items = Vec::with_capacity(sass_items.len());
@@ -28,7 +28,7 @@ pub fn compile_body_items(file_context: &FileContext,
 
 pub fn compile_body_item(file_context: &FileContext,
                          scope: &mut Scope,
-                         selectors: &Selectors,
+                         selectors: &sass::Selectors,
                          item: &sass::Item)
                          -> Result<Vec<css::Item>, Error> {
     match *item {
@@ -172,7 +172,9 @@ pub fn compile_body_item(file_context: &FileContext,
             let css_items =
                 compile_body_items(file_context, &mut scope, &selectors, body)?;
             if css_items.len() > 0 {
-                Ok(vec![css::Item::Rule(css::Rule::new(selectors, css_items))])
+                let css_selectors = compile_selectors(&mut scope, &selectors)?;
+                Ok(vec![css::Item::Rule(css::Rule::new(css_selectors,
+                                                       css_items))])
             } else {
                 Ok(vec![])
             }

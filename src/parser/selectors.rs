@@ -1,7 +1,6 @@
 use nom::is_alphanumeric;
 use parser::util::{opt_spacelike, spacelike2};
-
-use selectors::{Selector, SelectorPart, Selectors};
+use sass::{Selector, SelectorPart, Selectors};
 use std::str::from_utf8;
 
 named!(pub selectors<Selectors>,
