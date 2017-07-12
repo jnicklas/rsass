@@ -1,6 +1,4 @@
 use std::ascii::AsciiExt;
-use std::fmt;
-use std::io::Write;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Selectors(pub Vec<Selector>);
@@ -110,80 +108,6 @@ impl SelectorPart {
                 name.is_ascii() && arg.is_ascii()
             }
             SelectorPart::Pseudo { ref name, arg: None } => name.is_ascii(),
-        }
-    }
-}
-
-impl fmt::Display for Selectors {
-    fn fmt(&self, out: &mut fmt::Formatter) -> fmt::Result {
-        if let Some((first, rest)) = self.0.split_first() {
-            first.fmt(out)?;
-            let separator = if out.alternate() { "," } else { ", " };
-            for item in rest {
-                out.write_str(separator)?;
-                item.fmt(out)?;
-            }
-        }
-        Ok(())
-    }
-}
-
-impl fmt::Display for Selector {
-    fn fmt(&self, out: &mut fmt::Formatter) -> fmt::Result {
-        // Note: There should be smarter whitespace-handling here, avoiding
-        // the need to clean up afterwards.
-        let mut buf = vec![];
-        for p in &self.0 {
-            if out.alternate() {
-                write!(&mut buf, "{:#}", p).map_err(|_| fmt::Error)?;
-            } else {
-                write!(&mut buf, "{}", p).map_err(|_| fmt::Error)?;
-            }
-        }
-        while buf.last() == Some(&b' ') {
-            buf.pop();
-        }
-        while buf.first() == Some(&b' ') {
-            buf.remove(0);
-        }
-        let buf = String::from_utf8(buf).map_err(|_| fmt::Error)?;
-        out.write_str(&buf.replace("  ", " "))
-    }
-}
-
-impl fmt::Display for SelectorPart {
-    fn fmt(&self, out: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            SelectorPart::Simple(ref s) => write!(out, "{}", s),
-            SelectorPart::Descendant => write!(out, " "),
-            SelectorPart::RelOp(ref c) => {
-                if out.alternate() && *c != b'~' {
-                    write!(out, "{}", *c as char)
-                } else {
-                    write!(out, " {} ", *c as char)
-                }
-            }
-            SelectorPart::Attribute { ref name, ref op, ref val } => {
-                write!(out, "[{}{}{}]", name, op, val)
-            }
-            SelectorPart::PseudoElement(ref name) => write!(out, "::{}", name),
-            SelectorPart::Pseudo { ref name, ref arg } => {
-                if let Some(ref arg) = *arg {
-                    // It seems some pseudo-classes should always have
-                    // their arg in compact form.  Maybe we need more
-                    // hard-coded names here, or maybe the condition
-                    // should be on the argument rather than the name?
-                    if out.alternate() || name == "nth-child" ||
-                       name == "nth-of-type" {
-                        write!(out, ":{}({:#})", name, arg)
-                    } else {
-                        write!(out, ":{}({})", name, arg)
-                    }
-                } else {
-                    write!(out, ":{}", name)
-                }
-            }
-            SelectorPart::BackRef => write!(out, "&"),
         }
     }
 }

@@ -49,6 +49,13 @@ impl OutputStyle {
         }
     }
 
+    pub fn selector_separator(self) -> &'static str {
+        match self {
+            OutputStyle::Compressed => "",
+            OutputStyle::Expanded(_) => " ",
+        }
+    }
+
     pub fn rule_opening_separator(self) -> &'static str {
         match self {
             OutputStyle::Compressed => "",

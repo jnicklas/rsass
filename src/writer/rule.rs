@@ -16,11 +16,8 @@ pub fn write_rule(out: &mut io::Write,
     if !body_items.is_empty() {
         write!(out, "{: <1$}", "", style.indentation())?;
 
-        if style.is_compressed() {
-            write!(out, "{:#}{{", rule.selectors)?;
-        } else {
-            write!(out, "{} {{", rule.selectors)?;
-        }
+        write_selectors(out, style, &rule.selectors)?;
+        write!(out, "{}{{", style.selector_separator())?;
 
         write!(out, "{}", style.rule_opening_separator())?;
         write_rule_body_items(out, style.indent(), &body_items)?;
