@@ -46,7 +46,7 @@ impl Item {
             &Item::Import(_) => true,
             &Item::AtRule(_) => true,
             &Item::Rule(_) => true,
-            &Item::Property(_, _, _) => false,
+            &Item::Property(_, _, _) => true,
             &Item::Comment(_) => include_comments,
         }
     }

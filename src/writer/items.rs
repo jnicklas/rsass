@@ -1,6 +1,5 @@
 use css;
 use output_style::OutputStyle;
-use selectors::Selectors;
 use std::io;
 use writer::*;
 
@@ -35,13 +34,21 @@ pub fn write_items(out: &mut io::Write,
                 }
             }
             &css::Item::AtRule(ref at_rule) => {
-                write_at_rule(out, style, &Selectors::root(), &at_rule)?;
+                write_root_at_rule(out, style, &at_rule)?;
             }
             &css::Item::Comment(ref c) => {
                 write_comment(out, style, c)?;
                 write!(out, "{}", style.item_separator())?;
             }
-            _ => panic!("not a root item: {:?}", item),
+            &css::Item::Property(ref name, ref value, important) => {
+                // TODO: this should raise an error if we are not in an @ rule.
+                write_property(out, style, name, value, important)?;
+                if style.include_trailing_semicolon() ||
+                   index != (root_items.len() - 1) {
+                    write!(out, ";")?;
+                }
+                write!(out, "{}", style.item_separator())?;
+            }
         }
     }
 

@@ -23,6 +23,11 @@ impl Selectors {
         }
     }
 
+    pub fn is_root(&self) -> bool {
+        self.0.len() == 1 && self.0[0].is_root()
+    }
+
+
     pub fn is_ascii(&self) -> bool {
         self.0.iter().all(|s| s.is_ascii())
     }
@@ -34,6 +39,10 @@ pub struct Selector(pub Vec<SelectorPart>);
 impl Selector {
     pub fn root() -> Self {
         Selector(vec![])
+    }
+
+    pub fn is_root(&self) -> bool {
+        self.0.is_empty()
     }
 
     pub fn join(&self, other: &Selector) -> Selector {
