@@ -159,7 +159,11 @@ pub fn compile_root_item(file_context: &FileContext,
             let mut scope = ScopeImpl::sub(scope);
             let css_items =
                 compile_body_items(file_context, &mut scope, &selectors, body)?;
-            Ok(vec![css::Item::Rule(css::Rule::new(selectors, css_items))])
+            if css_items.len() > 0 {
+                Ok(vec![css::Item::Rule(css::Rule::new(selectors, css_items))])
+            } else {
+                Ok(vec![])
+            }
         }
         sass::Item::NamespaceRule(..) => {
             panic!("Global namespaced property not allowed");
@@ -337,7 +341,11 @@ pub fn compile_body_item(file_context: &FileContext,
 
             let css_items =
                 compile_body_items(file_context, &mut scope, &selectors, body)?;
-            Ok(vec![css::Item::Rule(css::Rule::new(selectors, css_items))])
+            if css_items.len() > 0 {
+                Ok(vec![css::Item::Rule(css::Rule::new(selectors, css_items))])
+            } else {
+                Ok(vec![])
+            }
         }
         sass::Item::NamespaceRule(ref name, ref value, ref body) => {
             let mut css_items = Vec::with_capacity(body.len() + 1);
