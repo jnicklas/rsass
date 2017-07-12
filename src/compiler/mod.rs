@@ -6,6 +6,7 @@ use variablescope::{GlobalScope, Scope};
 
 mod root_items;
 mod body_items;
+mod function_items;
 
 pub fn compile(file_context: &FileContext,
                sass_items: &[sass::Item])
@@ -18,4 +19,11 @@ pub fn compile_in_scope(file_context: &FileContext,
                         sass_items: &[sass::Item])
                         -> Result<Vec<css::Item>, Error> {
     root_items::compile_root_items(file_context, scope, sass_items)
+}
+
+pub fn compile_value(scope: &mut Scope,
+                     sass_items: &[sass::Item])
+                     -> Result<css::Value, Error> {
+    let result = function_items::compile_function_items(scope, sass_items)?;
+    Ok(result.unwrap_or(css::Value::Null))
 }

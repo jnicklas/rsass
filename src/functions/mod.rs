@@ -1,3 +1,4 @@
+use compiler::compile_value;
 use css;
 use error::Error;
 use sass;
@@ -89,9 +90,7 @@ impl SassFunction {
         let mut s = self.args.eval(scope, args);
         match self.body {
             FuncImpl::Builtin(ref body) => body(&s),
-            FuncImpl::UserDefined(ref body) => {
-                Ok(s.eval_body(body).unwrap_or(css::Value::Null))
-            }
+            FuncImpl::UserDefined(ref body) => compile_value(&mut s, body),
         }
     }
 }

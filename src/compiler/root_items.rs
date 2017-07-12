@@ -1,3 +1,4 @@
+use compiler::body_items::*;
 use css;
 use error::Error;
 use file_context::FileContext;
@@ -6,7 +7,6 @@ use sass;
 use selectors::Selectors;
 use value::Quotes;
 use variablescope::{Scope, ScopeImpl};
-use compiler::body_items::*;
 
 pub fn compile_root_items(file_context: &FileContext,
                           scope: &mut Scope,
