@@ -1,5 +1,3 @@
-use std::ascii::AsciiExt;
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Selectors(pub Vec<Selector>);
 
@@ -7,6 +5,7 @@ impl Selectors {
     pub fn root() -> Self {
         Selectors(vec![Selector::root()])
     }
+
     pub fn inside(&self, parent: Option<&Self>) -> Self {
         if let Some(parent) = parent {
             let mut result = Vec::new();
@@ -20,15 +19,6 @@ impl Selectors {
             self.clone()
         }
     }
-
-    pub fn is_root(&self) -> bool {
-        self.0.len() == 1 && self.0[0].is_root()
-    }
-
-
-    pub fn is_ascii(&self) -> bool {
-        self.0.iter().all(|s| s.is_ascii())
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -37,10 +27,6 @@ pub struct Selector(pub Vec<SelectorPart>);
 impl Selector {
     pub fn root() -> Self {
         Selector(vec![])
-    }
-
-    pub fn is_root(&self) -> bool {
-        self.0.is_empty()
     }
 
     pub fn join(&self, other: &Selector) -> Selector {
@@ -60,10 +46,6 @@ impl Selector {
             result.extend(other.0.iter().cloned());
             Selector(result)
         }
-    }
-
-    pub fn is_ascii(&self) -> bool {
-        self.0.iter().all(|s| s.is_ascii())
     }
 }
 
@@ -89,23 +71,6 @@ impl SelectorPart {
             SelectorPart::PseudoElement(_) |
             SelectorPart::Pseudo { .. } |
             SelectorPart::BackRef => false,
-        }
-    }
-
-    pub fn is_ascii(&self) -> bool {
-        match *self {
-            SelectorPart::Descendant |
-            SelectorPart::BackRef |
-            SelectorPart::RelOp(_) => true,
-            SelectorPart::Simple(ref string) => string.is_ascii(),
-            SelectorPart::Attribute { ref name, ref op, ref val } => {
-                name.is_ascii() && op.is_ascii() && val.is_ascii()
-            }
-            SelectorPart::PseudoElement(ref name) => name.is_ascii(),
-            SelectorPart::Pseudo { ref name, arg: Some(ref arg) } => {
-                name.is_ascii() && arg.is_ascii()
-            }
-            SelectorPart::Pseudo { ref name, arg: None } => name.is_ascii(),
         }
     }
 }
