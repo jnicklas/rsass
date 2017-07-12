@@ -48,10 +48,10 @@ fn write_at_rule_with_body_fun<F>(out: &mut io::Write,
 
         write!(out, "{: <1$}", "", style.indentation())?;
         write!(out, "}}")?;
-        write!(out, "{}", style.item_separator())?;
     } else {
         write!(out, ";")?;
     }
+    write!(out, "{}", style.item_separator())?;
 
     Ok(())
 }
