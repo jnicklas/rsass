@@ -116,10 +116,9 @@ pub fn compile_root_item(file_context: &FileContext,
             let mut css_items = Vec::with_capacity(values.len());
 
             for value in values {
-                let mut scope = ScopeImpl::sub(scope);
                 scope.define(name, &value);
                 css_items.extend(compile_root_items(file_context,
-                                                    &mut scope,
+                                                    scope,
                                                     body)?);
             }
 
@@ -135,10 +134,9 @@ pub fn compile_root_item(file_context: &FileContext,
             let mut css_items = Vec::with_capacity(range.len());
 
             for value in range {
-                let mut scope = ScopeImpl::sub(scope);
                 scope.define(name, &css::Value::scalar(value));
                 css_items.extend(compile_root_items(file_context,
-                                                    &mut scope,
+                                                    scope,
                                                     body)?);
             }
 
@@ -147,10 +145,9 @@ pub fn compile_root_item(file_context: &FileContext,
         sass::Item::While(ref cond, ref body) => {
             let mut css_items = vec![];
 
-            let mut scope = ScopeImpl::sub(scope);
-            while cond.evaluate(&scope).is_true() {
+            while cond.evaluate(scope).is_true() {
                 css_items.extend(compile_root_items(file_context,
-                                                    &mut scope,
+                                                    scope,
                                                     body)?);
             }
 
@@ -294,10 +291,9 @@ pub fn compile_body_item(file_context: &FileContext,
             let mut css_items = Vec::with_capacity(values.len());
 
             for value in values {
-                let mut scope = ScopeImpl::sub(scope);
                 scope.define(name, &value);
                 css_items.extend(compile_body_items(file_context,
-                                                    &mut scope,
+                                                    scope,
                                                     selectors,
                                                     body)?);
             }
@@ -314,10 +310,9 @@ pub fn compile_body_item(file_context: &FileContext,
             let mut css_items = Vec::with_capacity(range.len());
 
             for value in range {
-                let mut scope = ScopeImpl::sub(scope);
                 scope.define(name, &css::Value::scalar(value));
                 css_items.extend(compile_body_items(file_context,
-                                                    &mut scope,
+                                                    scope,
                                                     selectors,
                                                     body)?);
             }
@@ -327,10 +322,9 @@ pub fn compile_body_item(file_context: &FileContext,
         sass::Item::While(ref cond, ref body) => {
             let mut css_items = vec![];
 
-            let mut scope = ScopeImpl::sub(scope);
-            while cond.evaluate(&scope).is_true() {
+            while cond.evaluate(scope).is_true() {
                 css_items.extend(compile_body_items(file_context,
-                                                    &mut scope,
+                                                    scope,
                                                     selectors,
                                                     body)?);
             }
