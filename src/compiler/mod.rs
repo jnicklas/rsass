@@ -4,7 +4,8 @@ use file_context::FileContext;
 use sass;
 use variablescope::{GlobalScope, Scope};
 
-mod item;
+mod root_items;
+mod body_items;
 
 pub fn compile(file_context: &FileContext,
                sass_items: &[sass::Item])
@@ -16,5 +17,5 @@ pub fn compile_in_scope(file_context: &FileContext,
                         scope: &mut Scope,
                         sass_items: &[sass::Item])
                         -> Result<Vec<css::Item>, Error> {
-    item::compile_root_items(file_context, scope, sass_items)
+    root_items::compile_root_items(file_context, scope, sass_items)
 }
