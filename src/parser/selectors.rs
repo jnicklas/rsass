@@ -1,6 +1,8 @@
 use nom::is_alphanumeric;
 use parser::util::{opt_spacelike, spacelike2};
-use sass::{Selector, SelectorPart, Selectors};
+use parser::value::value_expression;
+use sass::{InterpolationString, InterpolationStringPart, Selector,
+           SelectorPart, Selectors};
 use std::str::from_utf8;
 
 named!(pub selectors<Selectors>,
@@ -8,6 +10,9 @@ named!(pub selectors<Selectors>,
            do_parse!(tag!(",") >> opt!(is_a!(", \t\n")) >> ()),
            selector),
             |s| Selectors(s)));
+
+named!(pub complete_selectors<Selectors>,
+        do_parse!(selectors: selectors >> tag!(";") >> (selectors)));
 
 named!(pub selector<Selector>,
        map!(many1!(selector_part),
@@ -22,7 +27,7 @@ named!(pub selector<Selector>,
 named!(selector_part<&[u8], SelectorPart>,
        alt_complete!(
            map!(selector_string, |s| SelectorPart::Simple(s)) |
-           value!(SelectorPart::Simple("*".to_string()), tag!("*")) |
+           value!(SelectorPart::Simple("*".into()), tag!("*")) |
            do_parse!(tag!("::") >>
                      name: selector_string >>
                      (SelectorPart::PseudoElement(name))) |
@@ -61,8 +66,8 @@ named!(selector_part<&[u8], SelectorPart>,
                      tag!("]") >>
                      (SelectorPart::Attribute {
                          name: name,
-                         op: "".to_string(),
-                         val: "".to_string(),
+                         op: "".into(),
+                         val: "".into(),
                      })) |
            value!(SelectorPart::BackRef, tag!("&")) |
            delimited!(opt_spacelike,
@@ -75,30 +80,43 @@ named!(selector_part<&[u8], SelectorPart>,
            ));
 
 
-named!(selector_string<String>,
-       fold_many1!(alt_complete!(selector_plain_part | selector_escaped_part),
-                   String::new(),
-                   |mut acc: String, item: &[u8]| {
-                       acc.push_str(from_utf8(item).unwrap());
+named!(selector_string<InterpolationString>,
+       fold_many1!(alt_complete!(
+                       selector_interpolation_part |
+                       selector_plain_part |
+                       selector_escaped_part |
+                       selector_hash_part),
+                   InterpolationString(vec![]),
+                   |mut acc: InterpolationString, item| {
+                       acc.0.push(item);
                        acc
                    }));
-named!(selector_plain_part<&[u8]>,
-       take_while1!(is_selector_char));
-named!(selector_escaped_part<&[u8]>,
-       recognize!(preceded!(tag!("\\"), many_m_n!(1, 3, hexpair))));
+named!(selector_plain_part<InterpolationStringPart>,
+       map!(take_while1!(is_selector_char),
+       |v| InterpolationStringPart::Simple(from_utf8(v).unwrap().into())));
+named!(selector_escaped_part<InterpolationStringPart>,
+       map!(recognize!(preceded!(tag!("\\"), many_m_n!(1, 3, hexpair))),
+       |v| InterpolationStringPart::Simple(from_utf8(v).unwrap().into())));
+named!(selector_interpolation_part<InterpolationStringPart>,
+       map!(delimited!(tag!("#{"), value_expression, tag!("}")),
+            |v| InterpolationStringPart::Value(v)));
+named!(selector_hash_part<InterpolationStringPart>,
+       map!(tag!("#"),
+            |_| InterpolationStringPart::Simple("#".into())));
+
 named!(hexpair,
        recognize!(do_parse!(one_of!("0123456789ABCDEFabcdef") >>
                             one_of!("0123456789ABCDEFabcdef") >> ())));
 
 fn is_selector_char(chr: u8) -> bool {
-    is_alphanumeric(chr) || chr == b'_' || chr == b'-' || chr == b'.' ||
-    chr == b'#'
+    is_alphanumeric(chr) || chr == b'_' || chr == b'-' || chr == b'.'
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
     use nom::IResult::*;
+    use sass::Value;
 
     #[test]
     fn simple_selector() {
@@ -108,9 +126,18 @@ mod test {
     }
     #[test]
     fn escaped_simple_selector() {
-        assert_eq!(selector(b"\\E9m "),
-                   Done(&b""[..],
-                        Selector(vec![SelectorPart::Simple("\\E9m".into())])))
+        let string = InterpolationString(vec!["\\E9".into(), "m".into()]);
+        let actual = Selector(vec![SelectorPart::Simple(string)]);
+        assert_eq!(selector(b"\\E9m "), Done(&b""[..], actual))
+    }
+
+    #[test]
+    fn simple_selector_with_interpolation() {
+        let value = InterpolationStringPart::Value(Value::scalar(12));
+        let string =
+            InterpolationString(vec!["foo".into(), value, "bar".into()]);
+        let actual = Selector(vec![SelectorPart::Simple(string)]);
+        assert_eq!(selector(b"foo#{12}bar"), Done(&b""[..], actual))
     }
 
     #[test]

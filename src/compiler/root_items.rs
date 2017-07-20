@@ -1,4 +1,5 @@
 use compiler::body_items::*;
+use compiler::interpolate_selectors::*;
 use compiler::selectors::*;
 use css;
 use error::Error;
@@ -154,14 +155,19 @@ pub fn compile_root_item(file_context: &FileContext,
 
             Ok(css_items)
         }
-        sass::Item::Rule(ref s, ref body) => {
+        sass::Item::Rule(ref interpolation, ref body) => {
             let root = sass::Selectors::root();
-            let selectors = s.inside(Some(&root));
-            let mut scope = ScopeImpl::sub(scope);
-            let css_items =
-                compile_body_items(file_context, &mut scope, &selectors, body)?;
+            let selectors = interpolate_selectors(scope, interpolation)?
+                .inside(Some(&root));
+            let css_selectors = compile_selectors(scope, &selectors)?;
+
+            let mut sub_scope = ScopeImpl::sub(scope);
+            let css_items = compile_body_items(file_context,
+                                               &mut sub_scope,
+                                               &selectors,
+                                               body)?;
+
             if css_items.len() > 0 {
-                let css_selectors = compile_selectors(&mut scope, &selectors)?;
                 Ok(vec![css::Item::Rule(css::Rule::new(css_selectors,
                                                        css_items))])
             } else {

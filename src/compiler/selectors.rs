@@ -29,26 +29,26 @@ pub fn compile_selector_part(scope: &mut Scope,
                              -> Result<css::SelectorPart, Error> {
     match part {
         &sass::SelectorPart::Simple(ref string) => {
-            Ok(css::SelectorPart::Simple(string.clone()))
+            Ok(css::SelectorPart::Simple(string.to_string()))
         }
         &sass::SelectorPart::Descendant => Ok(css::SelectorPart::Descendant),
         &sass::SelectorPart::RelOp(num) => Ok(css::SelectorPart::RelOp(num)),
         &sass::SelectorPart::Attribute { ref name, ref op, ref val } => {
             Ok(css::SelectorPart::Attribute {
-                   name: name.clone(),
+                   name: name.to_string(),
                    op: op.clone(),
                    val: val.clone(),
                })
         }
         &sass::SelectorPart::PseudoElement(ref name) => {
-            Ok(css::SelectorPart::PseudoElement(name.clone()))
+            Ok(css::SelectorPart::PseudoElement(name.to_string()))
         }
         &sass::SelectorPart::Pseudo { ref name, ref arg } => {
             let arg = match arg {
                 &Some(ref s) => Some(compile_selectors(scope, s)?),
                 &None => None,
             };
-            Ok(css::SelectorPart::Pseudo { name: name.clone(), arg: arg })
+            Ok(css::SelectorPart::Pseudo { name: name.to_string(), arg: arg })
         }
         &sass::SelectorPart::BackRef => Ok(css::SelectorPart::BackRef),
     }

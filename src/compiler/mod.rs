@@ -8,6 +8,7 @@ mod root_items;
 mod body_items;
 mod function_items;
 mod selectors;
+mod interpolate_selectors;
 
 pub fn compile(file_context: &FileContext,
                sass_items: &[sass::Item])

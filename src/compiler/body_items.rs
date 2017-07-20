@@ -1,3 +1,4 @@
+use compiler::interpolate_selectors::*;
 use compiler::selectors::*;
 use css;
 use error::Error;
@@ -165,8 +166,9 @@ pub fn compile_body_item(file_context: &FileContext,
 
             Ok(css_items)
         }
-        sass::Item::Rule(ref s, ref body) => {
-            let selectors = s.inside(Some(selectors));
+        sass::Item::Rule(ref interpolation, ref body) => {
+            let selectors = interpolate_selectors(scope, interpolation)?
+                .inside(Some(selectors));
             let mut scope = ScopeImpl::sub(scope);
 
             let css_items =

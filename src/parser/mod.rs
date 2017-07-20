@@ -5,7 +5,7 @@ pub mod unit;
 pub mod value;
 
 use self::formalargs::{call_args, formal_args};
-use self::selectors::selectors;
+use self::selectors::{complete_selectors, selectors};
 use self::value::{function_call, interpolation, quoted_string, single_value,
                   singlequoted_string, value_expression};
 use error::Error;
@@ -19,7 +19,7 @@ use parser::util::{comment, ignore_space, name, opt_spacelike, spacelike};
 #[cfg(test)]
 use sass::{CallArgs, FormalArgs};
 
-use sass::{Item, Value};
+use sass::{Item, Selectors, Value};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -36,6 +36,13 @@ pub fn parse_value_data(data: &[u8]) -> Result<Value, Error> {
     let expression = format!("{};", String::from_utf8(Vec::from(data))?);
     let value = value_expression(expression.as_bytes()).to_result()?;
     Ok(value)
+}
+
+/// Parse a scss selector. Must be terminated with a semicolon.
+///
+/// Returns a selector.
+pub fn parse_selector_data(data: &[u8]) -> Result<Selectors, Error> {
+    Ok(complete_selectors(data).to_result()?)
 }
 
 /// Parse a scss file.

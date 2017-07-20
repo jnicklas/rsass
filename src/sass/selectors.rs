@@ -1,9 +1,15 @@
+use sass::InterpolationString;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Selectors(pub Vec<Selector>);
 
 impl Selectors {
     pub fn root() -> Self {
         Selectors(vec![Selector::root()])
+    }
+
+    pub fn is_last(&self, selector: &Selector) -> bool {
+        self.0.iter().last() == Some(selector)
     }
 
     pub fn inside(&self, parent: Option<&Self>) -> Self {
@@ -51,13 +57,13 @@ impl Selector {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SelectorPart {
-    Simple(String),
+    Simple(InterpolationString),
     Descendant,
     RelOp(u8), // >, +, ~
-    Attribute { name: String, op: String, val: String },
     /// A css3 pseudo-element
-    PseudoElement(String),
-    Pseudo { name: String, arg: Option<Selectors> },
+    PseudoElement(InterpolationString),
+    Attribute { name: InterpolationString, op: String, val: String },
+    Pseudo { name: InterpolationString, arg: Option<Selectors> },
     BackRef,
 }
 
