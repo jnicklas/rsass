@@ -96,6 +96,7 @@ impl SelectorPart {
             SelectorPart::Attribute { ref name, ref op, ref val } => {
                 name.is_ascii() && op.is_ascii() && val.is_ascii()
             }
+            SelectorPart::PseudoElement(ref name) => name.is_ascii(),
             SelectorPart::Pseudo { ref name, arg: Some(ref arg) } => {
                 name.is_ascii() && arg.is_ascii()
             }

@@ -80,7 +80,6 @@ impl Value {
             }
             &Value::Literal(ref string, _) => string.is_ascii(),
             &Value::List(ref values, _) => values.iter().all(|v| v.is_ascii()),
-            &Value::Paren(ref value) => value.is_ascii(),
             &Value::Numeric(_, _, _, _) => true,
             &Value::Color(_, _, _, _, Some(ref name)) => name.is_ascii(),
             &Value::Color(_, _, _, _, None) => true,
